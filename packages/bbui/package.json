@@ -76,6 +76,8 @@
     "atrament": "^4.3.0",
     "dayjs": "^1.10.8",
     "easymde": "^2.16.1",
+    "marked": "^15.0.8",
+    "shortid": "2.2.15",
     "svelte-dnd-action": "^0.9.8",
     "svelte-portal": "^2.2.1"
   },
