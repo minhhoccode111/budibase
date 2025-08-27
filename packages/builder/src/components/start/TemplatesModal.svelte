@@ -1,9 +1,12 @@
 <script lang="ts">
-  import { ModalContent, Layout } from "@budibase/bbui"
+  import { ModalContent, Layout, Button, Icon } from "@budibase/bbui"
   import TemplateCard from "@/components/common/TemplateCard.svelte"
   import { templates } from "@/stores/portal"
   import type { TemplateMetadata } from "@budibase/types"
+  import { createEventDispatcher } from "svelte"
+  import ComponentScrollWrapper from "@/pages/builder/app/[application]/design/[workspaceAppId]/[screenId]/_components/ComponentList/ComponentScrollWrapper.svelte"
 
+  const dispatch = createEventDispatcher()
   export let onSelectTemplate: (_template: TemplateMetadata) => void
 
   let newTemplates: TemplateMetadata[] = []
@@ -28,6 +31,12 @@
       selectedTemplateId = null
       throw error
     }
+  }
+
+  const handleAddNewTemplate = () => {
+    // TODO: handle navigate to create new template
+    // dispatch("add-new-template")
+    console.log("clicked!")
   }
 </script>
 
@@ -60,6 +69,14 @@
         </button>
       {/each}
     </div>
+    <div class="add-template-container">
+      <Button cta on:click={() => handleAddNewTemplate()}>
+        <div class="add-button-content">
+          <Icon name="plus" />
+          <span>Add new template</span>
+        </div>
+      </Button>
+    </div>
   </Layout>
 </ModalContent>
 
@@ -91,5 +108,18 @@
 
   .template-wrapper.loading:not(.selected) {
     opacity: 0.5;
+  }
+
+  /* Add styles for the new template button */
+  .add-template-container {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--spacing-m) var(--spacing-m) 0 var(--spacing-m);
+  }
+
+  .add-button-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
   }
 </style>
