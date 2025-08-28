@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { ModalContent, Layout, Button, Icon, Modal } from "@budibase/bbui"
+  import { ModalContent, Layout, Button, Icon } from "@budibase/bbui"
   import TemplateCard from "@/components/common/TemplateCard.svelte"
-  import DocumentTemplateModal from "./DocumentTemplateModal.svelte"
   import { templates } from "@/stores/portal"
   import type { TemplateMetadata } from "@budibase/types"
   import { createEventDispatcher } from "svelte"
+  import ComponentScrollWrapper from "@/pages/builder/app/[application]/design/[workspaceAppId]/[screenId]/_components/ComponentList/ComponentScrollWrapper.svelte"
 
   const dispatch = createEventDispatcher()
   export let onSelectTemplate: (_template: TemplateMetadata) => void
@@ -12,7 +12,6 @@
   let newTemplates: TemplateMetadata[] = []
   let isLoading = false
   let selectedTemplateId: string | null = null
-  let documentModal
 
   $: {
     const templateList = $templates as TemplateMetadata[]
@@ -35,16 +34,9 @@
   }
 
   const handleAddNewTemplate = () => {
-    documentModal.show()
-  }
-
-  const handleDocumentTemplateCreated = event => {
-    documentModal.hide()
-    dispatch("document-template-created", event.detail)
-  }
-
-  const handleDocumentModalCancel = () => {
-    documentModal.hide()
+    // TODO: handle navigate to create new template
+    // dispatch("add-new-template")
+    console.log("clicked!")
   }
 </script>
 
@@ -55,15 +47,6 @@
   showConfirmButton={false}
 >
   <Layout noPadding gap="M">
-    <div class="add-template-container">
-      <Button cta on:click={handleAddNewTemplate}>
-        <div class="add-button-content">
-          <Icon name="upload" />
-          <span>Create from Document</span>
-        </div>
-      </Button>
-    </div>
-
     <div class="template-grid">
       {#each newTemplates as template}
         <button
@@ -86,15 +69,16 @@
         </button>
       {/each}
     </div>
+    <div class="add-template-container">
+      <Button cta on:click={() => handleAddNewTemplate()}>
+        <div class="add-button-content">
+          <Icon name="plus" />
+          <span>Add new template</span>
+        </div>
+      </Button>
+    </div>
   </Layout>
 </ModalContent>
-
-<Modal bind:this={documentModal} size="L">
-  <DocumentTemplateModal
-    on:template-created={handleDocumentTemplateCreated}
-    on:cancel={handleDocumentModalCancel}
-  />
-</Modal>
 
 <style>
   .template-grid {
@@ -126,6 +110,7 @@
     opacity: 0.5;
   }
 
+  /* Add styles for the new template button */
   .add-template-container {
     display: flex;
     justify-content: flex-end;
