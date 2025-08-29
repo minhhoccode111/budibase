@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { ModalContent, Layout, Button, Icon } from "@budibase/bbui"
+  import { ModalContent, Layout, Button, Icon, Modal } from "@budibase/bbui"
   import TemplateCard from "@/components/common/TemplateCard.svelte"
+  import DocxTemplateUploadModal from "./DocxTemplateUploadModal.svelte"
   import { templates } from "@/stores/portal"
   import type { TemplateMetadata } from "@budibase/types"
   import { createEventDispatcher } from "svelte"
-  import ComponentScrollWrapper from "@/pages/builder/app/[application]/design/[workspaceAppId]/[screenId]/_components/ComponentList/ComponentScrollWrapper.svelte"
 
   const dispatch = createEventDispatcher()
   export let onSelectTemplate: (_template: TemplateMetadata) => void
@@ -37,7 +37,11 @@
     // TODO: handle navigate to create new template
     // dispatch("add-new-template")
     console.log("clicked!")
+    // For now, we'll show the DOCX upload modal
+    docxUploadModal.show()
   }
+
+  let docxUploadModal: Modal
 </script>
 
 <ModalContent
@@ -79,6 +83,10 @@
     </div>
   </Layout>
 </ModalContent>
+
+<Modal bind:this={docxUploadModal}>
+  <DocxTemplateUploadModal />
+</Modal>
 
 <style>
   .template-grid {
