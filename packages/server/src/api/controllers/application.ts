@@ -41,6 +41,7 @@ import { removeAppFromUserRoles } from "../../utilities/workerRequests"
 import { doesUserHaveLock } from "../../utilities/redis"
 import { cleanupAutomations } from "../../automations/utils"
 import { getUniqueRows } from "../../utilities/usageQuota/rows"
+import { createAppFromDocxTemplate } from "../../utilities/docxTemplate"
 import { groups, licensing, quotas } from "@budibase/pro"
 import {
   App,
@@ -159,11 +160,18 @@ async function createInstance(appId: string, template: AppTemplate) {
   await createAllSearchIndex()
 
   if (template && template.useTemplate) {
-    const opts = {
-      importObjStoreContents: true,
-      updateAttachmentColumns: !template.key, // preserve attachments when using Budibase templates
+    // Check if this is a DOCX template
+    if (template.key && template.key.startsWith("docx/")) {
+      // Handle DOCX template creation
+      await createAppFromDocxTemplate(appId, db, template.key)
+    } else {
+      // Handle regular template import
+      const opts = {
+        importObjStoreContents: true,
+        updateAttachmentColumns: !template.key, // preserve attachments when using Budibase templates
+      }
+      await sdk.backups.importApp(appId, db, template, opts)
     }
-    await sdk.backups.importApp(appId, db, template, opts)
   } else {
     // create the users table
     await db.put(USERS_TABLE_SCHEMA)

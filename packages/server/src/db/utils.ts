@@ -162,6 +162,14 @@ export function generateScreenID() {
 }
 
 /**
+ * Generates a new component ID.
+ * @returns The new component ID which can be used for components.
+ */
+export function generateComponentID() {
+  return newid()
+}
+
+/**
  * Gets parameters for retrieving screens, this is a utility function for the getDocParams function.
  */
 export function getScreenParams(screenId?: Optional, otherProps: any = {}) {

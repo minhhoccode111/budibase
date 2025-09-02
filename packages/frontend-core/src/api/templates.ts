@@ -14,6 +14,7 @@ export interface TemplateEndpoints {
   saveEmailTemplate: (
     template: SaveGlobalTemplateRequest
   ) => Promise<SaveGlobalTemplateResponse>
+  uploadDocxTemplate: (formData: FormData) => Promise<any>
 }
 
 export const buildTemplateEndpoints = (
@@ -52,6 +53,18 @@ export const buildTemplateEndpoints = (
   getAppTemplates: async () => {
     return await API.get({
       url: "/api/templates",
+    })
+  },
+
+  /**
+   * Uploads a DOCX template.
+   * @param formData the form data containing the DOCX file and metadata
+   */
+  uploadDocxTemplate: async (formData: FormData) => {
+    return await API.post({
+      url: "/api/templates/docx",
+      body: formData,
+      json: false, // Don't JSON stringify FormData
     })
   },
 })

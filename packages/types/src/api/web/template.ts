@@ -13,6 +13,17 @@ export interface TemplateMetadata {
   key: string
   image: string
   new: boolean
+  // DOCX template specific properties
+  docxFile?: {
+    key: string
+    url: string
+    originalName: string
+    size: number
+  }
+  fields?: any[]
+  parseResults?: any
+  createdAt?: string
+  createdBy?: string
 }
 
 export type FetchTemplateResponse = TemplateMetadata[]

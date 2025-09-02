@@ -8,7 +8,11 @@
     notifications,
     ProgressCircle,
   } from "@budibase/bbui"
-  import mammoth from "mammoth"
+  import * as mammoth from "mammoth"
+  import { API } from "@/api"
+  import { createEventDispatcher } from "svelte"
+
+  const dispatch = createEventDispatcher()
 
   interface TemplateField {
     name: string
@@ -415,13 +419,12 @@
         formData.append("parseResults", JSON.stringify(parseResults))
       }
 
-      // TODO: Create API endpoint for DOCX template upload
-      // const response = await API.uploadDocxTemplate(formData)
+      // Upload template using API
+      const response = await API.uploadDocxTemplate(formData)
 
-      // For now, simulate successful upload
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      notifications.success("Template uploaded successfully")
+      notifications.success(
+        "Template uploaded successfully! It will appear in the template selection."
+      )
 
       // Reset form
       file = null
@@ -430,6 +433,9 @@
       parsedFields = []
       showPreview = false
       parseResults = null
+
+      // Dispatch event to parent to refresh templates
+      dispatch("template-uploaded", response)
     } catch (error) {
       notifications.error("Failed to upload template")
       console.error("Upload error:", error)

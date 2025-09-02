@@ -23,7 +23,17 @@
     selectedTemplateId = template.key
 
     try {
-      await onSelectTemplate(template)
+      // For DOCX templates, ensure proper template structure for backend processing
+      if (template.key && template.key.startsWith("docx/")) {
+        const docxTemplate = {
+          ...template,
+          useTemplate: true,
+          key: template.key,
+        }
+        await onSelectTemplate(docxTemplate)
+      } else {
+        await onSelectTemplate(template)
+      }
     } catch (error) {
       isLoading = false
       selectedTemplateId = null
@@ -32,8 +42,15 @@
   }
 
   const handleAddNewTemplate = () => {
-    // For now, we'll show the DOCX upload modal
+    // Show the DOCX upload modal
     docxUploadModal.show()
+  }
+
+  const handleTemplateUploaded = async () => {
+    // Refresh the templates store to include the new template
+    await templates.load()
+    // Close the upload modal
+    docxUploadModal.hide()
   }
 
   let docxUploadModal: Modal
@@ -80,7 +97,7 @@
 </ModalContent>
 
 <Modal bind:this={docxUploadModal}>
-  <DocxTemplateUploadModal />
+  <DocxTemplateUploadModal on:template-uploaded={handleTemplateUploaded} />
 </Modal>
 
 <style>
