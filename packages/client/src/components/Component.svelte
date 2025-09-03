@@ -83,6 +83,7 @@
 
   // Conditional UI expressions, enriched and ready to evaluate
   let conditions
+  let fetchedConditionValues = {}
 
   // Latest timestamp that we started a props update.
   // Due to enrichment now being async, we need to avoid overwriting newer
@@ -474,9 +475,32 @@
     generateConditions()
   }
 
+  const resolveJsonPath = (obj, path) => {
+    if (!path) {
+      return obj
+    }
+    return path.split(".").reduce((acc, key) => (acc ? acc[key] : undefined), obj)
+  }
+
+  const fetchExternalConditionValues = async conds => {
+    const tasks = conds
+      ?.filter(c => c?.external && c?.fetchUrl)
+      .map(async c => {
+        try {
+          const res = await fetch(c.fetchUrl)
+          const data = await res.json()
+          const value = resolveJsonPath(data, c.jsonPath)
+          fetchedConditionValues[c.id] = value
+        } catch (e) {
+          // swallow
+        }
+      })
+    await Promise.all(tasks || [])
+  }
+
   // Evaluates the list of conditional UI conditions and determines any setting
   // or visibility changes required
-  const evaluateConditions = conditions => {
+  const evaluateConditions = async conditions => {
     if (!conditions?.length) {
       return
     }
@@ -484,8 +508,18 @@
     // Default visible to false if there is a show condition
     let nextVisible = !conditions.find(condition => condition.action === "show")
 
+    // Fetch external values if requested
+    await fetchExternalConditionValues(conditions)
+
+    // Apply fetched values to conditions prior to evaluation
+    const prepared = conditions.map(c =>
+      c?.external && fetchedConditionValues[c.id] !== undefined
+        ? { ...c, newValue: fetchedConditionValues[c.id] }
+        : c
+    )
+
     // Execute conditions and determine settings and visibility changes
-    const activeConditions = getActiveConditions(conditions)
+    const activeConditions = getActiveConditions(prepared)
     const result = reduceConditionActions(activeConditions)
     if (result.visible != null) {
       nextVisible = result.visible

@@ -16,5 +16,6 @@ if (env.isDev() || env.isTest()) {
 
 builderRoutes
   .get("/api/dev/version", controller.getBudibaseVersion)
+  .get("/api/dev/mock/condition", controller.getMockCondition)
   .delete("/api/dev/:appId/lock", controller.clearLock)
   .post("/api/dev/:appId/revert", controller.revert)

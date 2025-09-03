@@ -16,6 +16,7 @@
   import { selectedComponent, componentStore } from "@/stores/builder"
   import { getComponentForSetting } from "@/components/design/settings/componentSettings"
   import PropertyControl from "@/components/design/settings/controls/PropertyControl.svelte"
+  import { Input, Checkbox } from "@budibase/bbui"
 
   export let conditions = []
   export let bindings = []
@@ -101,6 +102,9 @@
         id: generate(),
         action: "hide",
         operator: Constants.OperatorOptions.Equals.value,
+        external: false,
+        fetchUrl: "",
+        jsonPath: "",
       },
     ]
   }
@@ -237,12 +241,31 @@
                 {/if}
               {/if}
               <div>IF</div>
-              <DrawerBindableInput
-                {bindings}
-                placeholder="Value"
-                value={condition.newValue}
-                on:change={e => (condition.newValue = e.detail)}
-              />
+              <div class="external-row">
+                <Checkbox
+                  label="Fetch value from external API"
+                  bind:checked={condition.external}
+                />
+                {#if condition.external}
+                  <Input
+                    label="API URL"
+                    placeholder="/api/dev/mock/condition?type=string&value=ok"
+                    bind:value={condition.fetchUrl}
+                  />
+                  <Input
+                    label="JSON path (e.g. data.value)"
+                    placeholder="data.value"
+                    bind:value={condition.jsonPath}
+                  />
+                {/if}
+                <DrawerBindableInput
+                  disabled={condition.external}
+                  {bindings}
+                  placeholder="Value"
+                  value={condition.newValue}
+                  on:change={e => (condition.newValue = e.detail)}
+                />
+              </div>
               <Select
                 placeholder={false}
                 options={getOperatorOptions(condition)}

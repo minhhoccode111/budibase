@@ -19,4 +19,8 @@ export interface ComponentCondition {
   referenceValue?: any
   setting?: string
   settingValue?: any
+  // External API value resolution
+  external?: boolean
+  fetchUrl?: string
+  jsonPath?: string
 }

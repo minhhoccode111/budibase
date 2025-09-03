@@ -106,3 +106,30 @@ export async function getBudibaseVersion(ctx: Ctx<void, GetVersionResponse>) {
   }
   await events.installation.versionChecked(version)
 }
+
+export async function getMockCondition(ctx: any) {
+  const { type = "string", value = "ok" } = ctx.query || {}
+  let parsed: any = value
+  try {
+    if (type === "number") {
+      parsed = parseFloat(value)
+    } else if (type === "boolean") {
+      parsed = `${value}`.toLowerCase() === "true"
+    } else if (type === "datetime") {
+      parsed = new Date(value).toISOString()
+    }
+  } catch (e) {
+    // fall back to raw value
+    parsed = value
+  }
+
+  ctx.body = {
+    data: {
+      value: parsed,
+    },
+    info: {
+      source: "dev-mock",
+      type,
+    },
+  }
+}
