@@ -8,6 +8,7 @@ import {
 } from "../db/utils"
 import { USERS_TABLE_SCHEMA } from "../constants"
 import { BASE_LAYOUTS, EMPTY_LAYOUT } from "../constants/layouts"
+import sdk from "../sdk"
 
 interface DocxTemplateField {
   name: string
@@ -107,9 +108,9 @@ function createFormScreen(
   table: Table,
   templateName: string,
   workspaceAppId: string
-): Screen {
-  const screenId = generateScreenID()
+): Omit<Screen, "_id" | "_rev"> {
   const formBlockId = generateComponentID()
+  const containerComponentId = generateComponentID()
 
   // Create form block component with proper structure
   const formBlockComponent = {
@@ -142,7 +143,7 @@ function createFormScreen(
 
   // Create container component as the root screen component
   const containerComponent = {
-    _id: screenId,
+    _id: containerComponentId,
     _component: "@budibase/standard-components/container",
     _instanceName: `${templateName} Screen`,
     _styles: {
@@ -161,14 +162,17 @@ function createFormScreen(
   }
 
   return {
-    _id: screenId,
+    name: `${templateName} Form`,
+    showNavigation: true,
+    width: "Large",
     routing: {
       route: `/${templateName.toLowerCase().replace(/\s+/g, "-")}`,
       roleId: "BASIC",
+      homeScreen: false,
     },
     props: containerComponent,
     workspaceAppId,
-  } as Screen
+  }
 }
 
 /**
@@ -254,9 +258,25 @@ export async function createAppFromDocxTemplate(
     const layout = createBasicLayout()
     await db.put(layout)
 
-    // Create form screen
-    const screen = createFormScreen(table, templateData.name, appId)
-    await db.put(screen)
+    // Create workspace app
+    const workspaceApp = await sdk.workspaceApps.create({
+      name: templateData.name,
+      url: "/",
+      navigation: {
+        navigation: "Top",
+        links: [],
+      },
+      disabled: false,
+      isDefault: true,
+    })
+
+    // Create form screen using the workspace app ID
+    const screenData = createFormScreen(
+      table,
+      templateData.name,
+      workspaceApp._id!
+    )
+    const screen = await sdk.screens.create(screenData)
 
     // Create the users table (always needed)
     await db.put(USERS_TABLE_SCHEMA)
@@ -265,6 +285,8 @@ export async function createAppFromDocxTemplate(
       `Successfully created app from DOCX template: ${templateData.name}`
     )
     console.log(`Created table with ${compatibleFields.length} fields`)
+    console.log(`Created workspace app: ${workspaceApp._id}`)
+    console.log(`Created screen: ${screen._id}`)
   } catch (error) {
     console.error("Error creating app from DOCX template:", error)
     // Fallback to basic app creation
